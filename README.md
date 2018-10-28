@@ -33,4 +33,4 @@ $ fctime stop water
 $ fctime query water
 ```
 
-water可以换成oi, study, luotianyi等你喜欢的东西.
+water可以换成oi, study, emacs等你喜欢的东西.
