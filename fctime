@@ -1,0 +1,64 @@
+#!/bin/sh
+
+if [ ! -d ~/.fctime ]; then
+	rm -rf ~/.fctime;
+	mkdir ~/.fctime;
+fi
+
+OPERATION=${1};
+TASKNAME=${2};
+
+if [ "${OPERATION}" = "s" -o "${OPERATION}" = "start" ]; then
+	if [ -f ~/.fctime/${TASKNAME}.start ]; then
+		echo "You have run the task!"
+	else
+		date "+%s" > ~/.fctime/${TASKNAME}.start
+	fi
+elif [ "${OPERATION}" = "e" -o "${OPERATION}" = "stop" ]; then
+	if [ -f ~/.fctime/${TASKNAME}.start ]; then
+		STARTTIME=`cat ~/.fctime/${TASKNAME}.start`;
+		ENDTIME=`date +%s`;
+
+		TOTAL=`expr ${ENDTIME} '-' ${STARTTIME}`;
+		SEC=`expr ${TOTAL} '%' 60`;
+		MIN=`expr ${TOTAL} '/' 60 '%' 60`;
+		HOR=`expr ${TOTAL} '/' 3600`;
+		DAY=`expr ${TOTAL} '/' 86400`;
+
+		if [ -f ~/.fctime/${TASKNAME}.total ]; then
+			DELTA=`cat ~/.fctime/${TASKNAME}.total`;
+			TOTAL=`expr ${TOTAL} '+' ${DELTA}`;
+		fi
+
+		echo "${TOTAL}" > ~/.fctime/${TASKNAME}.total;
+
+		echo "End task   : ${TASKNAME}";
+		echo "This time  : ${DAY}d, ${HOR}h, ${MIN}m, ${SEC}s";
+
+		SEC=`expr ${TOTAL} '%' 60`;
+		MIN=`expr ${TOTAL} '/' 60 '%' 60`;
+		HOR=`expr ${TOTAL} '/' 3600`;
+		DAY=`expr ${TOTAL} '/' 86400`;
+
+		echo "Total cost : ${DAY}d, ${HOR}h, ${MIN}m, ${SEC}s";
+
+		rm ~/.fctime/${TASKNAME}.start;
+	else
+		echo "No such a task : ${TASKNAME}";
+	fi
+elif [ "${OPERATION}" = "q" -o "${OPERATION}" = "query" ]; then
+	TOTAL="0";
+	if [ -f ~/.fctime/${TASKNAME}.total ]; then
+		TOTAL=`cat ~/.fctime/${TASKNAME}.total`;
+	fi
+
+	SEC=`expr ${TOTAL} '%' 60`;
+	MIN=`expr ${TOTAL} '/' 60 '%' 60`;
+	HOR=`expr ${TOTAL} '/' 3600`;
+	DAY=`expr ${TOTAL} '/' 86400`;
+
+	echo "You total spend on ${TASKNAME} : ${DAY}d, ${HOR}h, ${MIN}m, ${SEC}s";
+else
+	echo 'Useage :';
+	echo '$ fctime [start|stop|query] taskname';
+fi
